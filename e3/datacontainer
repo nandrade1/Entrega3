@@ -1,0 +1,24 @@
+#!/bin/bash
+docker rm -f mariadb
+docker rm -f nginx
+docker rm -f wordpress
+#docker rm -f datacontainer
+
+#---MARIADB----
+docker run --name=mariadb -d -e MYSQL_ROOT_PASSWORD=mariadb -e MYSQL_DATABASE1=moodle -e MYSQL_USER1=moodle -e MYSQL_PASSWORD1=moodle -v ~/data:/var/lib/mysql orboan/dcsss-mariadb
+
+#----APACHE-----
+docker create -v `pwd`:/data/www/html --name nginx -p 8080:80 nginx
+ 
+#----WORDPRESS----
+docker create --name=wordpress -p 8081:80 -v ~/workspace:/workspace/ wordpress
+
+#----CONTENIDOR-DOBLE-VOLUM-----
+docker run -d --volumes-from nginx --volumes-from mariadb --volumes-from wordpress --name datacontainer ubuntu
+
+#----ARRANCAR-CONTENIDORS-----
+docker start nginx
+docker start wordpress
+echo "DATACONTAINER PONIENDOSE EN SEGUNDO PLANO"
+docker start datacontainer
+
